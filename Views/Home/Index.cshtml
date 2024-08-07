@@ -1,0 +1,162 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Weather Forecast</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+            font-size: 18px;
+        }
+        header {
+            background-color: #f0f0f0;
+            padding: 20px;
+            display: flex;
+            justify-content: flex-start;
+        }
+        main {
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            padding: 20px;
+        }
+        h1 {
+            font-size: 4rem;
+            margin-bottom: 20px;
+        }
+        h2 {
+            font-size: 3rem;
+            margin-bottom: 20px;
+        }
+        p {
+            font-size: 2rem;
+            margin: 10px 0;
+        }
+        .weather-icon {
+            width: 200px;
+            height: 200px;
+            margin: 20px 0;
+        }
+        .button {
+            margin-right: 20px;
+            padding: 10px 20px;
+            text-decoration: none;
+            color: #333;
+            background-color: #ddd;
+            border-radius: 5px;
+            font-size: 1.2rem;
+        }
+    </style>
+</head>
+<body>
+
+    <main>
+        <h1>Weather Forecast</h1>
+        <h2 id="city">Istanbul</h2>
+        <p id="weather-summary">Warm</p>
+        <img src="/api/placeholder/200/200" alt="Weather Icon" class="weather-icon">
+        <p id="date">August 7, 2024</p>
+        <p id="temp-celsius">25°C</p>
+        <p id="temp-fahrenheit">77°F</p>
+    </main>
+</body>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Weekly Weather Report</title>
+    <style>
+        .weekly-forecast {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 40px auto;
+            padding: 20px;
+            background-color: #f0f0f0;
+            border-radius: 10px;
+        }
+        .weekly-forecast h2 {
+            text-align: center;
+            color: #333;
+            margin-bottom: 20px;
+        }
+        .forecast-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        .forecast-table th {
+            background-color: #4CAF50;
+            color: white;
+            padding: 12px;
+            text-align: left;
+            border-bottom: 2px solid #ddd;
+        }
+        .forecast-table td {
+            padding: 12px;
+            border-bottom: 1px solid #ddd;
+        }
+        .forecast-table tr:nth-child(even) {
+            background-color: #f2f2f2;
+        }
+    </style>
+</head>
+<body>
+    <section class="weekly-forecast">
+        <h2>Weekly Weather Forecast</h2>
+        <table class="forecast-table">
+            <thead>
+                <tr>
+                    <th>Date</th>
+                    <th>Temperature</th>
+                    <th>Summary</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>Monday</td>
+                    <td>25°C / 77°F</td>
+                    <td>Sunny</td>
+                </tr>
+                <tr>
+                    <td>Tuesday</td>
+                    <td>23°C / 73°F</td>
+                    <td>Partly cloudy</td>
+                </tr>
+                <tr>
+                    <td>Wednesday</td>
+                    <td>22°C / 72°F</td>
+                    <td>Cloudy</td>
+                </tr>
+                <tr>
+                    <td>Thursday</td>
+                    <td>24°C / 75°F</td>
+                    <td>Sunny</td>
+                </tr>
+                <tr>
+                    <td>Friday</td>
+                    <td>26°C / 79°F</td>
+                    <td>Warm</td>
+                </tr>
+                <tr>
+                    <td>Saturday</td>
+                    <td>27°C / 81°F</td>
+                    <td>Hot</td>
+                </tr>
+                <tr>
+                    <td>Sunday</td>
+                    <td>25°C / 77°F</td>
+                    <td>Mild</td>
+                </tr>
+            </tbody>
+        </table>
+    </section>
+</body>
+
+</html>
