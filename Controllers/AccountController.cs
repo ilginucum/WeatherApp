@@ -1,10 +1,21 @@
+using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Mvc;
+using System.Security.Claims;
 using Weather_App.Models;
+using Weather_App.Repositories;
 
 namespace WeatherApp.Controllers
 {
     public class AccountController : Controller
     {
+        private readonly MongoDbRepository _mongoDbRepository;
+
+        public AccountController(MongoDbRepository mongoDbRepository)
+        {
+            _mongoDbRepository = mongoDbRepository;
+        }
+
         // GET: /Account/Login
         public IActionResult Login()
         {
@@ -14,15 +25,23 @@ namespace WeatherApp.Controllers
         // POST: /Account/Login
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public IActionResult Login(LoginModel model)
+        public async Task<IActionResult> Login(LoginModel model)
         {
             if (ModelState.IsValid)
             {
-                // Here you would add authentication logic
-                // For demonstration, we'll just check if the username and password are not empty
-                if (model.Username == "user" && model.Password == "password") // Replace with real authentication
+                // Replace with your real authentication logic
+                if (model.Username == "user" && model.Password == "password")
                 {
-                    // Redirect to a secure page or dashboard
+                    var claims = new List<Claim>
+                    {
+                        new Claim(ClaimTypes.Name, model.Username)
+                    };
+
+                    var claimsIdentity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
+
+                    await HttpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, new ClaimsPrincipal(claimsIdentity));
+
+                    // Redirect to the home page after successful login
                     return RedirectToAction("Index", "Home");
                 }
                 else
@@ -46,11 +65,10 @@ namespace WeatherApp.Controllers
         {
             if (ModelState.IsValid)
             {
-                // Here you would add logic to create a new user
-                // For demonstration, we'll just check if the username doesn't already exist
-                // In a real application, you'd check against a database
-                if (model.Username != "existinguser") // Replace with real user creation logic
+                // Replace with real user creation logic
+                if (model.Username != "existinguser")
                 {
+                    // In a real application, you'd add the user to the database here
                     // Redirect to login page after successful registration
                     return RedirectToAction(nameof(Login));
                 }
@@ -60,6 +78,13 @@ namespace WeatherApp.Controllers
                 }
             }
             return View(model);
+        }
+
+        // GET: /Account/Logout
+        public async Task<IActionResult> Logout()
+        {
+            await HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
+            return RedirectToAction("Login", "Account");
         }
     }
 }

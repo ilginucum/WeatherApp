@@ -1,8 +1,11 @@
+using System.Net;
+
 namespace Weather_App.Models
 {
     public class LoginModel
     {
         public string Username { get; set; }
         public string Password { get; set; }
+     
     }
 }

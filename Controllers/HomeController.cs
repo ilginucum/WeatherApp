@@ -1,9 +1,11 @@
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Weather_App.Models;
 using System.Collections.Generic;
 
 namespace WeatherApp.Controllers
 {
+    [Authorize] // Requires the user to be authenticated to access any action in this controller
     public class HomeController : Controller
     {
         public IActionResult Index()
