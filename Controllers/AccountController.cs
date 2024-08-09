@@ -29,8 +29,8 @@ namespace WeatherApp.Controllers
         {
             if (ModelState.IsValid)
             {
-                // Replace with your real authentication logic
-                if (model.Username == "user" && model.Password == "password")
+                var user = await _mongoDbRepository.GetUserByUsername(model.Username);
+                if (user != null && user.Password == model.Password) // Ensure you hash and compare passwords securely in a real app
                 {
                     var claims = new List<Claim>
                     {
@@ -58,17 +58,26 @@ namespace WeatherApp.Controllers
             return View();
         }
 
-        // POST: /Account/Register
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public IActionResult Register(RegisterModel model)
+        public async Task<IActionResult> Register(RegisterModel model)
         {
             if (ModelState.IsValid)
             {
-                // Replace with real user creation logic
-                if (model.Username != "existinguser")
-                {
-                    // In a real application, you'd add the user to the database here
+                // Check if the username already exists in the database
+                var existingUser = await _mongoDbRepository.GetUserByUsername(model.Username);
+                if (existingUser == null)
+                {       
+                    // Create a new user registration
+                    var userRegistration = new UserRegistration
+                    {
+                        Username = model.Username,
+                        Password = model.Password // In a real application, you should hash the password before saving it
+                    };
+
+                    // Save the user registration to the database
+                    await _mongoDbRepository.SaveUserRegistration(userRegistration);
+
                     // Redirect to login page after successful registration
                     return RedirectToAction(nameof(Login));
                 }
@@ -77,6 +86,7 @@ namespace WeatherApp.Controllers
                     ModelState.AddModelError("", "Username already exists.");
                 }
             }
+
             return View(model);
         }
 
@@ -88,3 +98,4 @@ namespace WeatherApp.Controllers
         }
     }
 }
+
