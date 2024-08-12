@@ -40,14 +40,7 @@ namespace Weather_App.Repositories
     // Find the user by username
     var user = await collection.Find(u => u.Username == username).FirstOrDefaultAsync();
     
-    if (user != null && !user.userType) // Check if UserType is false
-    {
-        // Update UserType to true (lastUserType)
-        var filter = Builders<UserRegistration>.Filter.Eq(u => u.Username, username);
-        var update = Builders<UserRegistration>.Update.Set(u => u.userType, true);
-        
-        await collection.UpdateOneAsync(filter, update);
-    }
+    
 }
        
     }
