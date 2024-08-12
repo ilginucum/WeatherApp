@@ -10,6 +10,12 @@
     </div>
 
     <div class="form-group">
+        <label asp-for="DefaultCity" class="control-label"></label>
+        <input asp-for="DefaultCity" class="form-control" />
+        <span asp-validation-for="DefaultCity" class="text-danger"></span>
+    </div>
+
+    <div class="form-group">
         <label asp-for="CurrentPassword" class="control-label"></label>
         <input asp-for="CurrentPassword" class="form-control" type="password" />
         <span asp-validation-for="CurrentPassword" class="text-danger"></span>
