@@ -1,0 +1,31 @@
+@model Weather_App.Models.ProfileModel
+
+<h2>Manage Your Profile</h2>
+
+<form asp-action="Index" method="post">
+    <div class="form-group">
+        <label asp-for="Username" class="control-label"></label>
+        <input asp-for="Username" class="form-control" />
+        <span asp-validation-for="Username" class="text-danger"></span>
+    </div>
+
+    <div class="form-group">
+        <label asp-for="CurrentPassword" class="control-label"></label>
+        <input asp-for="CurrentPassword" class="form-control" type="password" />
+        <span asp-validation-for="CurrentPassword" class="text-danger"></span>
+    </div>
+
+    <div class="form-group">
+        <label asp-for="NewPassword" class="control-label"></label>
+        <input asp-for="NewPassword" class="form-control" type="password" />
+        <span asp-validation-for="NewPassword" class="text-danger"></span>
+    </div>
+
+    <div class="form-group">
+        <label asp-for="ConfirmNewPassword" class="control-label"></label>
+        <input asp-for="ConfirmNewPassword" class="form-control" type="password" />
+        <span asp-validation-for="ConfirmNewPassword" class="text-danger"></span>
+    </div>
+
+    <button type="submit" class="btn btn-primary">Save Changes</button>
+</form>

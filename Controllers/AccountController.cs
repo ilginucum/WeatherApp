@@ -72,7 +72,7 @@ namespace WeatherApp.Controllers
                     var userRegistration = new UserRegistration
                     {
                         Username = model.Username,
-                        Password = model.Password // In a real application, you should hash the password before saving it
+                        Password = model.Password // hash the password before saving it
                     };
 
                     // Save the user registration to the database
@@ -86,6 +86,7 @@ namespace WeatherApp.Controllers
                     ModelState.AddModelError("", "Username already exists.");
                 }
             }
+            
 
             return View(model);
         }

@@ -10,5 +10,8 @@ public class UserLogin
     public string Id { get; set; }
     public string Username { get; set; }
     public string Password { get; set; }
- 
+    public string LogId { get; set; }
+    public char LogTime { get; set; }
+    public char Ip { get; set; }
+    
 }

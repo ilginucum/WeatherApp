@@ -17,10 +17,12 @@ builder.Services.AddScoped<MongoDbRepository>();
 
 // Add authentication services with cookie authentication
 builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
-                .AddCookie(options =>
-                {
-                    options.LoginPath = "/Account/Login"; // Redirect to login page
-                });
+    .AddCookie(options =>
+    {
+        options.LoginPath = "/Account/Login"; // Redirect to login page
+        options.LogoutPath = "/Account/Logout"; // Add logout path
+        options.AccessDeniedPath = "/Account/AccessDenied"; // Add access denied path
+    });
 
 // Add session services
 builder.Services.AddSession(options =>
@@ -47,7 +49,6 @@ if (!app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 app.UseStaticFiles();
-
 app.UseRouting();
 
 app.UseAuthentication(); // Enable authentication

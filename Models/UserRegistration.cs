@@ -9,6 +9,12 @@ public class UserRegistration
     public string Username { get; set; }
     public string Email { get; set; }
     public string Password { get; set; }
+    public string Name { get; set; }
+    public bool userType { get; set; }
+    public string DefaultCity { get; set; }
+    public string Status { get; set; }
+   
+    
   
 }
 
