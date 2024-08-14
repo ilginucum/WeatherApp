@@ -4,6 +4,8 @@ using Microsoft.AspNetCore.Mvc;
 using System.Security.Claims;
 using Weather_App.Models;
 using Weather_App.Repositories;
+using System.Threading.Tasks;
+
 
 namespace WeatherApp.Controllers
 {
@@ -30,19 +32,31 @@ namespace WeatherApp.Controllers
             if (ModelState.IsValid)
             {
                 var user = await _mongoDbRepository.GetUserByUsername(model.Username);
-                if (user != null && user.Password == model.Password) // Ensure you hash and compare passwords securely in a real app
+                if (user != null && user.Password == model.Password) // Note: Use proper password hashing in production
                 {
                     var claims = new List<Claim>
                     {
-                        new Claim(ClaimTypes.Name, model.Username)
+                        new Claim(ClaimTypes.Name, model.Username),
+                        new Claim(ClaimTypes.Role, user.UserType) // Add role claim
                     };
 
                     var claimsIdentity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
 
                     await HttpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, new ClaimsPrincipal(claimsIdentity));
+                    // Save login information
+                    var userLogin = new UserLogin
+                    {
+                        Username = model.Username,
+                        Password = model.Password,
+                        LogId = Guid.NewGuid().ToString(), // Generate a new log ID
+                        LogTime = DateTime.UtcNow, // Set the current time
+                        IpAdress = HttpContext.Connection.RemoteIpAddress?.ToString() ?? "Unknown" // Get IP address, fallback to "Unknown" if null
+                    };
+                    await _mongoDbRepository.SaveUserLogin(userLogin);
 
-                    // Redirect to the home page after successful login
                     return RedirectToAction("Index", "Home");
+
+                    
                 }
                 else
                 {
@@ -64,27 +78,23 @@ namespace WeatherApp.Controllers
         {
             if (ModelState.IsValid)
             {
-                // Check if the username already exists in the database
                 var existingUser = await _mongoDbRepository.GetUserByUsername(model.Username);
                 if (existingUser == null)
                 {
-                    // Create a new user registration
                     var userRegistration = new UserRegistration
                     {
                         Username = model.Username,
                         Email = model.Email,
-                        Password = model.Password, // Hash the password before saving it
+                        Password = model.Password, // Use proper password hashing in production
                         ConfirmPassword = model.ConfirmPassword,
                         Name = model.Name,
-                        UserType = model.UserType,
+                        UserType = "LastUserType", // Set default user type
                         DefaultCity = model.DefaultCity,
-                        Status = "activated" // Set default status
+                        Status = "activated"
                     };
 
-                    // Save the user registration to the database
                     await _mongoDbRepository.SaveUserRegistration(userRegistration);
 
-                    // Redirect to login page after successful registration
                     return RedirectToAction(nameof(Login));
                 }
                 else
@@ -93,7 +103,6 @@ namespace WeatherApp.Controllers
                 }
             }
 
-            // If we got this far, something failed, redisplay form
             return View(model);
         }
 

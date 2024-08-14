@@ -15,6 +15,9 @@ builder.Services.Configure<MongoDbSettings>(builder.Configuration.GetSection("Mo
 builder.Services.AddSingleton<IMongoClient>(CreateMongoClient);
 builder.Services.AddScoped<MongoDbRepository>();
 
+
+
+
 // Add authentication services with cookie authentication
 builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
     .AddCookie(options =>

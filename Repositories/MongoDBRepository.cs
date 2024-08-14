@@ -34,6 +34,19 @@ namespace Weather_App.Repositories
             return user;
         }
 
+         // UserLogin methods
+        public async Task LogUserLogin(UserLogin userLogin)
+        {
+            var collection = _database.GetCollection<UserLogin>("UserLogins");
+            await collection.InsertOneAsync(userLogin);
+        }
+
+        public async Task<IEnumerable<UserLogin>> GetUserLogins(string username)
+        {
+            var collection = _database.GetCollection<UserLogin>("UserLogins");
+            return await collection.Find(u => u.Username == username).ToListAsync();
+        }
+
         public async Task UpdateUser(UserRegistration updatedUser)
 {
     var collection = _database.GetCollection<UserRegistration>("UserRegistrations");

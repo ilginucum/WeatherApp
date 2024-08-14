@@ -1,5 +1,6 @@
 using MongoDB.Bson;
 using MongoDB.Bson.Serialization.Attributes;
+using System;
 
 
 
@@ -11,7 +12,7 @@ public class UserLogin
     public string Username { get; set; }
     public string Password { get; set; }
     public string LogId { get; set; }
-    public char LogTime { get; set; }
-    public char Ip { get; set; }
+    public DateTime LogTime { get; set; }
+    public string IpAdress { get; set; }
     
 }
