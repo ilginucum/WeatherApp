@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace Weather_App.Repositories
 {
-    public class MongoDbRepository
+    public class MongoDbRepository : IMongoDBRepository
     {
         private readonly IMongoDatabase _database;
 
@@ -48,26 +48,27 @@ namespace Weather_App.Repositories
         }
 
         public async Task UpdateUser(UserRegistration updatedUser)
-{
-    var collection = _database.GetCollection<UserRegistration>("UserRegistrations");
-    var filter = Builders<UserRegistration>.Filter.Eq(u => u.Username, updatedUser.Username);
-
-    var updateDefinition = Builders<UserRegistration>.Update
-        .Set(u => u.Username, updatedUser.Username);
-
-    if (!string.IsNullOrEmpty(updatedUser.DefaultCity))
     {
-        updateDefinition = updateDefinition.Set(u => u.DefaultCity, updatedUser.DefaultCity);
+        var collection = _database.GetCollection<UserRegistration>("UserRegistrations");
+        var filter = Builders<UserRegistration>.Filter.Eq(u => u.Username, updatedUser.Username);
+        var updateDefinition = Builders<UserRegistration>.Update
+            .Set(u => u.Username, updatedUser.Username);
+
+        if (!string.IsNullOrEmpty(updatedUser.DefaultCity))
+        {
+            updateDefinition = updateDefinition.Set(u => u.DefaultCity, updatedUser.DefaultCity);
+        }
+
+        if (!string.IsNullOrEmpty(updatedUser.Password))
+        {
+            updateDefinition = updateDefinition
+                .Set(u => u.Password, updatedUser.Password)
+                .Set(u => u.Salt, updatedUser.Salt);  // Add this line to update the salt
+        }
+
+        await collection.UpdateOneAsync(filter, updateDefinition);
     }
 
-    if (!string.IsNullOrEmpty(updatedUser.Password))
-    {
-        // Ideally, hash the password before saving
-        updateDefinition = updateDefinition.Set(u => u.Password, updatedUser.Password);
-    }
-
-    await collection.UpdateOneAsync(filter, updateDefinition);
-}
 
         public async Task InitializeUserTypeIfNeeded(string username)
         {
@@ -83,5 +84,43 @@ namespace Weather_App.Repositories
                 await collection.UpdateOneAsync(u => u.Username == username, update);
             }
         }
+        //interface repo // Implement the methods from IMongoDBRepository
+    public async Task<IEnumerable<UserLogin>> GetAllUsers()
+    {
+        var collection = _database.GetCollection<UserLogin>("UserLogins");
+        return await collection.Find(_ => true).ToListAsync();
+    }
+
+    public async Task<UserLogin> AddUser(UserLogin user)
+    {
+        var collection = _database.GetCollection<UserLogin>("UserLogins");
+        await collection.InsertOneAsync(user);
+        return user;
+    }
+
+    public async Task DeleteUser(string id)
+    {
+        var collection = _database.GetCollection<UserLogin>("UserLogins");
+        await collection.DeleteOneAsync(u => u.LogId == id);
+    }
+
+    public async Task<IEnumerable<WeatherForecast>> GetAllWeatherData()
+    {
+        var collection = _database.GetCollection<WeatherForecast>("WeatherForecasts");
+        return await collection.Find(_ => true).ToListAsync();
+    }
+
+    public async Task<WeatherForecast> AddWeatherData(WeatherForecast weatherData)
+    {
+        var collection = _database.GetCollection<WeatherForecast>("WeatherForecasts");
+        await collection.InsertOneAsync(weatherData);
+        return weatherData;
+    }
+
+    public async Task DeleteWeatherData(string id)
+    {
+        var collection = _database.GetCollection<WeatherForecast>("WeatherForecasts");
+        await collection.DeleteOneAsync(w => w.Id == id);
+    }
     }
 }

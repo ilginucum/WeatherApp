@@ -9,6 +9,8 @@
 /Users/macbookpro/Desktop/Weather-App/bin/Debug/net8.0/AWSSDK.Core.dll
 /Users/macbookpro/Desktop/Weather-App/bin/Debug/net8.0/AWSSDK.SecurityToken.dll
 /Users/macbookpro/Desktop/Weather-App/bin/Debug/net8.0/DnsClient.dll
+/Users/macbookpro/Desktop/Weather-App/bin/Debug/net8.0/Microsoft.AspNetCore.Cryptography.Internal.dll
+/Users/macbookpro/Desktop/Weather-App/bin/Debug/net8.0/Microsoft.AspNetCore.Cryptography.KeyDerivation.dll
 /Users/macbookpro/Desktop/Weather-App/bin/Debug/net8.0/MongoDB.Bson.dll
 /Users/macbookpro/Desktop/Weather-App/bin/Debug/net8.0/MongoDB.Driver.dll
 /Users/macbookpro/Desktop/Weather-App/bin/Debug/net8.0/MongoDB.Driver.Core.dll

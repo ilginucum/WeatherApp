@@ -10,13 +10,14 @@ var builder = WebApplication.CreateBuilder(args);
 // Add services to the container.
 builder.Services.AddControllersWithViews();
 
+
 // Configure the MongoDB connection
 builder.Services.Configure<MongoDbSettings>(builder.Configuration.GetSection("MongoDbSettings"));
 builder.Services.AddSingleton<IMongoClient>(CreateMongoClient);
 builder.Services.AddScoped<MongoDbRepository>();
 
 
-
+builder.Services.AddSingleton<IMongoDBRepository, MongoDbRepository>();
 
 // Add authentication services with cookie authentication
 builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)

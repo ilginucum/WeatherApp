@@ -1,7 +1,8 @@
 using Microsoft.AspNetCore.Mvc;
+using System.Threading.Tasks;
 using Weather_App.Models;
 using Weather_App.Repositories;
-using System.Threading.Tasks;
+using Weather_App.Helpers;
 
 namespace WeatherApp.Controllers
 {
@@ -67,10 +68,11 @@ namespace WeatherApp.Controllers
                     user.DefaultCity = model.DefaultCity;
                 }
 
-                if (!string.IsNullOrEmpty(model.CurrentPassword) && !string.IsNullOrEmpty(model.NewPassword))
+                if (!string.IsNullOrEmpty(model.CurrentPassword) || !string.IsNullOrEmpty(model.NewPassword))
                 {
                     // Check if the current password is correct
-                    if (user.Password != model.CurrentPassword)
+                    if (string.IsNullOrEmpty(model.CurrentPassword) ||
+                        !PasswordHelper.VerifyPassword(model.CurrentPassword, user.Salt, user.Password))
                     {
                         ModelState.AddModelError("", "Current password is incorrect.");
                         return View(model);
@@ -83,8 +85,10 @@ namespace WeatherApp.Controllers
                         return View(model);
                     }
 
-                    // Update password (ensure you hash the new password before saving)
-                    user.Password = model.NewPassword;
+                    // Generate new salt and hash the new password
+                    var newSalt = PasswordHelper.GenerateSalt();
+                    user.Salt = newSalt;
+                    user.Password = PasswordHelper.HashPassword(model.NewPassword, newSalt);
                 }
 
                 await _mongoDbRepository.UpdateUser(user);
