@@ -1,0 +1,39 @@
+@model Weather_App.Models.WeatherForecast
+
+<h2>Add Weather Data</h2>
+
+<form asp-action="AddWeatherData" method="post">
+    <div class="form-group">
+        <label asp-for="Date">Date</label>
+        <input asp-for="Date" class="form-control" type="date" />
+        <span asp-validation-for="Date" class="text-danger"></span>
+    </div>
+
+    <div class="form-group">
+        <label asp-for="CityName">City Name</label>
+        <input asp-for="CityName" class="form-control" />
+        <span asp-validation-for="CityName" class="text-danger"></span>
+    </div>
+
+    <div class="form-group">
+        <label asp-for="Temperature">Temperature (°C)</label>
+        <input asp-for="Temperature" class="form-control" type="number" step="0.1" />
+        <span asp-validation-for="Temperature" class="text-danger"></span>
+    </div>
+
+    <div class="form-group">
+        <label asp-for="MainStatus">Main Status</label>
+        <input asp-for="MainStatus" class="form-control" />
+        <span asp-validation-for="MainStatus" class="text-danger"></span>
+    </div>
+
+    <div class="form-group">
+                <input type="submit" value="Add Weather Data" class="btn btn-primary" />
+            </div>
+</form>
+
+
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+}
