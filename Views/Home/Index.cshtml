@@ -1,0 +1,150 @@
+﻿@model Weather_App.Models.WeatherViewModel
+@using Weather_App.Models
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Weather Forecast</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+            font-size: 18px;
+        }
+        header {
+            background-color: #f0f0f0;
+            padding: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        nav {
+            display: flex;
+            gap: 10px;
+        }
+        .button {
+            padding: 10px 20px;
+            text-decoration: none;
+            color: #333;
+            background-color: #ddd;
+            border-radius: 5px;
+            font-size: 1.2rem;
+        }
+        main {
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            padding: 20px;
+        }
+        h1 {
+            font-size: 4rem;
+            margin-bottom: 20px;
+        }
+        h2 {
+            font-size: 3rem;
+            margin-bottom: 20px;
+        }
+        p {
+            font-size: 2rem;
+            margin: 10px 0;
+        }
+        .weather-icon {
+            width: 200px;
+            height: 200px;
+            margin: 20px 0;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+        th, td {
+            border: 1px solid #ddd;
+            padding: 8px;
+            text-align: center;
+        }
+        th {
+            background-color: #f2f2f2;
+        }
+        #weatherChart {
+            width: 100%;
+            max-width: 800px;
+            margin-top: 40px;
+        }
+    </style>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+    <main>
+        <h1>Weather Forecast</h1>
+        <h2 id="city">@Model.CurrentWeather.CityName</h2>
+        <p id="weather-summary">@Model.CurrentWeather.MainStatus</p>
+        <img src="/api/placeholder/200/200" alt="Weather Icon" class="weather-icon">
+        <p id="date">@Model.CurrentWeather.Date.ToString("MMMM d, yyyy")</p>
+        <p id="temp-celsius">@Model.CurrentWeather.Temperature°C</p>
+
+        <h2>Weekly Forecast</h2>
+        <table>
+            <thead>
+                <tr>
+                    <th>Date</th>
+                    <th>Temperature</th>
+                    <th>Status</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var forecast in Model.WeeklyForecast)
+                {
+                    <tr>
+                        <td>@forecast.Date.ToString("MMM dd")</td>
+                        <td>@forecast.Temperature°C</td>
+                        <td>@forecast.MainStatus</td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+
+        <!-- Line Chart for Weekly Temperature -->
+        <canvas id="weatherChart"></canvas>
+    </main>
+
+    <script>
+        // Prepare data for the chart
+        const labels = @Html.Raw(Json.Serialize(Model.WeeklyForecast.Select(f => f.Date.ToString("MMM dd")).ToList()));
+        const data = @Html.Raw(Json.Serialize(Model.WeeklyForecast.Select(f => f.Temperature).ToList()));
+
+        // Configuring the Chart
+        const ctx = document.getElementById('weatherChart').getContext('2d');
+        const weatherChart = new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: labels,
+                datasets: [{
+                    label: 'Temperature (°C)',
+                    data: data,
+                    backgroundColor: 'rgba(75, 192, 192, 0.2)',
+                    borderColor: 'rgba(75, 192, 192, 1)',
+                    borderWidth: 1,
+                    fill: false
+                }]
+            },
+            options: {
+                responsive: true,
+                scales: {
+                    y: {
+                        beginAtZero: true
+                    }
+                }
+            }
+        });
+    </script>
+</body>
+</html>
