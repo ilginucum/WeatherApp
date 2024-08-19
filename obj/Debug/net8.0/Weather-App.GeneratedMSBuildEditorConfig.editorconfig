@@ -30,8 +30,8 @@ build_metadata.AdditionalFiles.CssScope =
 build_metadata.AdditionalFiles.TargetPath = Vmlld3MvQWRtaW4vQWRkVXNlci5jc2h0bWw=
 build_metadata.AdditionalFiles.CssScope = 
 
-[/Users/macbookpro/Desktop/Weather-App/Views/Admin/AddUserSucess.cshtml]
-build_metadata.AdditionalFiles.TargetPath = Vmlld3MvQWRtaW4vQWRkVXNlclN1Y2Vzcy5jc2h0bWw=
+[/Users/macbookpro/Desktop/Weather-App/Views/Admin/AddUserSuccess.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3MvQWRtaW4vQWRkVXNlclN1Y2Nlc3MuY3NodG1s
 build_metadata.AdditionalFiles.CssScope = 
 
 [/Users/macbookpro/Desktop/Weather-App/Views/Admin/AddWeatherData.cshtml]
@@ -40,6 +40,10 @@ build_metadata.AdditionalFiles.CssScope =
 
 [/Users/macbookpro/Desktop/Weather-App/Views/Admin/AddWeatherDataSuccess.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3MvQWRtaW4vQWRkV2VhdGhlckRhdGFTdWNjZXNzLmNzaHRtbA==
+build_metadata.AdditionalFiles.CssScope = 
+
+[/Users/macbookpro/Desktop/Weather-App/Views/Admin/EditUser.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3MvQWRtaW4vRWRpdFVzZXIuY3NodG1s
 build_metadata.AdditionalFiles.CssScope = 
 
 [/Users/macbookpro/Desktop/Weather-App/Views/Admin/Index.cshtml]

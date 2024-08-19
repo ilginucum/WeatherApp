@@ -46,3 +46,5 @@
 /Users/macbookpro/Desktop/Weather-App/obj/Debug/net8.0/Weather-App.pdb
 /Users/macbookpro/Desktop/Weather-App/obj/Debug/net8.0/Weather-App.genruntimeconfig.cache
 /Users/macbookpro/Desktop/Weather-App/obj/Debug/net8.0/ref/Weather-App.dll
+/Users/macbookpro/Desktop/Weather-App/bin/Debug/net8.0/package-lock.json
+/Users/macbookpro/Desktop/Weather-App/bin/Debug/net8.0/package.json

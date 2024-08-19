@@ -145,6 +145,13 @@ namespace Weather_App.Repositories
                                .ToListAsync();
     }
 
+        public async Task EditUser(UserRegistration user)
+    {
+        var collection = _database.GetCollection<UserRegistration>("UserRegistrations");
+        var filter = Builders<UserRegistration>.Filter.Eq(u => u.Username, user.Username);
+        await collection.ReplaceOneAsync(filter, user);
+    }
+
 
 
     }

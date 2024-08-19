@@ -22,6 +22,7 @@ namespace Weather_App.Repositories
         Task InitializeUserTypeIfNeeded(string username);
         Task<WeatherForecast> GetTodayWeatherDataByCity(string cityName);
         Task<List<WeatherForecast>> GetWeeklyWeatherForecastByCity(string city);
+        Task EditUser(UserRegistration user);
         
     }
 }
