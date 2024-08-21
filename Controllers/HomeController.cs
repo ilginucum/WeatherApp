@@ -2,6 +2,9 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Weather_App.Models;
 using Weather_App.Repositories;
+using Weather_App.Services;
+using Weather_App.Options;
+using System.Threading.Tasks;
 
 namespace WeatherApp.Controllers
 {
@@ -9,12 +12,15 @@ namespace WeatherApp.Controllers
     public class HomeController : Controller
     {
         private readonly IMongoDBRepository _repository;
+        private readonly IWeatherApiService _weatherApiService;
 
-        public HomeController(IMongoDBRepository repository)
+        public HomeController(IMongoDBRepository repository, IWeatherApiService weatherApiService)
         {
             _repository = repository;
+            _weatherApiService = weatherApiService;
         }
 
+        [Authorize]
         public async Task<IActionResult> Index()
         {
             var username = User.Identity.Name;
@@ -38,6 +44,17 @@ namespace WeatherApp.Controllers
             var currentWeather = await _repository.GetTodayWeatherDataByCity(user.DefaultCity);
             if (currentWeather == null)
             {
+                // Fetch the current weather data from the Weather API
+                currentWeather = await _weatherApiService.GetCurrentWeatherByCity(user.DefaultCity);
+                if (currentWeather != null)
+                {
+                    // Save the fetched weather data to the database
+                    await _repository.AddWeatherData(currentWeather);
+                }
+            }
+
+            if (currentWeather == null)
+            {
                 currentWeather = new WeatherForecast
                 {
                     CityName = user.DefaultCity,
@@ -47,7 +64,8 @@ namespace WeatherApp.Controllers
                 };
             }
 
-            var weeklyForecast = await _repository.GetWeeklyWeatherForecastByCity(user.DefaultCity);
+            // Fetch the weekly weather forecast from the Weather API
+            var weeklyForecast = await _weatherApiService.GetWeeklyWeatherForecastByCity(user.DefaultCity);
 
             var viewModel = new WeatherViewModel
             {
@@ -59,3 +77,5 @@ namespace WeatherApp.Controllers
         }
     }
 }
+
+

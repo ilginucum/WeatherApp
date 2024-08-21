@@ -24,5 +24,6 @@ namespace Weather_App.Repositories
         Task<List<WeatherForecast>> GetWeeklyWeatherForecastByCity(string city);
         Task EditUser(UserRegistration user);
         
+        
     }
 }

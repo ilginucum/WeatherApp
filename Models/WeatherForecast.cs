@@ -15,5 +15,7 @@ namespace Weather_App.Models
         //public int TemperatureF => 32 + (int)(Temperature / 0.5556);
         public string CityName { get; set; }
         public string MainStatus { get; set; }
+
+
     }
 }

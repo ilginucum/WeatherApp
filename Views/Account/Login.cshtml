@@ -4,42 +4,95 @@
 }
 
 <style>
+    body {
+        background: url('https://images.unsplash.com/photo-1534271057238-c2c170a76672?fm=jpg&q=60&w=3000&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8MTZ8fHB1cnBsZSUyMHNreXxlbnwwfHwwfHx8MA%3D%3D') no-repeat center center fixed;
+        background-size: cover;
+        font-family: 'Arial', sans-serif;
+        color: #fff;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        height: 100vh;
+        margin: 0;
+    }
+    .login-container {
+        background: rgba(131, 181, 242, 0.8); /* Transparent purple background */
+        border-radius: 15px;
+        padding: 40px;
+        width: 350px;
+        box-shadow: 0 0 20px rgba(0, 0, 0, 0.5);
+        backdrop-filter: blur(10px);
+        text-align: center;
+    }
+    .login-container h2 {
+        margin-bottom: 30px;
+        font-size: 28px;
+    }
     .form-group {
-        margin-bottom: 20px;
+        margin-bottom: 25px;
+    }
+    .form-control {
+        border-radius: 8px;
+        padding: 12px;
+        border: 1px solid #ccc;
+        margin-top: 5px;
+        background: #fff;
+        color: #333;
+    }
+    .form-control::placeholder {
+        color: #aaa;
     }
     .btn-container {
         margin-top: 20px;
     }
+    .btn-container input {
+        background: #7f00ff; /* Purple button */
+        border: none;
+        color: #fff;
+        padding: 12px 20px;
+        border-radius: 8px;
+        cursor: pointer;
+        font-size: 16px;
+        transition: background 0.3s;
+    }
+    .btn-container input:hover {
+        background: #5e00b5; /* Darker purple on hover */
+    }
     .register-container {
         margin-top: 20px;
     }
+    .register-container a {
+        color: #dee3e8; /* Purple link */
+        text-decoration: none;
+        font-weight: bold;
+        font-size: 16px;
+    }
+    .register-container a:hover {
+        text-decoration: underline;
+    }
 </style>
 
-<h2>@ViewData["Title"]</h2>
-
-<div class="row">
-    <div class="col-md-4">
-        <form asp-action="Login">
-            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
-            <div class="form-group">
-                <label asp-for="Username" class="control-label"></label>
-                <input asp-for="Username" class="form-control" />
-                <span asp-validation-for="Username" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <label asp-for="Password" class="control-label"></label>
-                <input asp-for="Password" class="form-control" type= "password"/>
-                <span asp-validation-for="Password" class="text-danger"></span>
-            </div>
-            <div class="form-group btn-container">
-                <input type="submit" value="Login" class="btn btn-primary" />
-            </div>
-        </form>
+<div class="login-container">
+    <h2>@ViewData["Title"]</h2>
+    <form asp-action="Login">
+        <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+        <div class="form-group">
+            <label asp-for="Username" class="control-label">Username</label>
+            <input asp-for="Username" class="form-control" placeholder="Enter your username" />
+            <span asp-validation-for="Username" class="text-danger"></span>
+        </div>
+        <div class="form-group">
+            <label asp-for="Password" class="control-label">Password</label>
+            <input asp-for="Password" class="form-control" type="password" placeholder="Enter your password" />
+            <span asp-validation-for="Password" class="text-danger"></span>
+        </div>
+        <div class="form-group btn-container">
+            <input type="submit" value="Login" />
+        </div>
+    </form>
+    <div class="register-container">
+        <a asp-action="Register">Register New User</a>
     </div>
-</div>
-
-<div class="register-container">
-    <a asp-action="Register" class="btn btn-secondary">Register New User</a>
 </div>
 
 @section Scripts {

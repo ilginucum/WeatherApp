@@ -151,8 +151,5 @@ namespace Weather_App.Repositories
         var filter = Builders<UserRegistration>.Filter.Eq(u => u.Username, user.Username);
         await collection.ReplaceOneAsync(filter, user);
     }
-
-
-
     }
 }

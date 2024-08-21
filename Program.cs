@@ -4,6 +4,9 @@ using Weather_App.Models;
 using Weather_App.Options;
 using Weather_App.Repositories;
 using Microsoft.AspNetCore.Authentication.Cookies;
+using System.Net.Http;
+using Newtonsoft.Json;
+using Weather_App.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -17,12 +20,12 @@ builder.Services.AddScoped<IMongoDBRepository, MongoDbRepository>();
 
 // Add authentication services with cookie authentication
 builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
-    .AddCookie(options =>
-    {
-        options.LoginPath = "/Account/Login"; // Redirect to login page
-        options.LogoutPath = "/Account/Logout"; // Add logout path
-        options.AccessDeniedPath = "/Account/AccessDenied"; // Add access denied path
-    });
+.AddCookie(options =>
+{
+    options.LoginPath = "/Account/Login"; // Redirect to login page
+    options.LogoutPath = "/Account/Logout"; // Add logout path
+    options.AccessDeniedPath = "/Account/AccessDenied"; // Add access denied path
+});
 
 // Add session services
 builder.Services.AddSession(options =>
@@ -31,6 +34,13 @@ builder.Services.AddSession(options =>
     options.Cookie.HttpOnly = true;
     options.Cookie.IsEssential = true;
 });
+
+// Add HttpClient service for making API requests
+builder.Services.AddHttpClient();
+
+// Add WeatherApiService
+builder.Services.Configure<WeatherApiOptions>(builder.Configuration.GetSection("WeatherApiOptions"));
+builder.Services.AddHttpClient<IWeatherApiService, WeatherApiService>();
 
 IMongoClient CreateMongoClient(IServiceProvider sp)
 {
@@ -50,10 +60,8 @@ if (!app.Environment.IsDevelopment())
 app.UseHttpsRedirection();
 app.UseStaticFiles();
 app.UseRouting();
-
 app.UseAuthentication(); // Enable authentication
 app.UseAuthorization();
-
 app.UseSession(); // Enable session
 
 app.MapControllerRoute(

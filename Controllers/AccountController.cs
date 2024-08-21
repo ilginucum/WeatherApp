@@ -6,6 +6,8 @@ using Weather_App.Models;
 using Weather_App.Repositories;
 using System.Threading.Tasks;
 using Weather_App.Helpers;
+using System.Net;
+using System.Net.Sockets;
 
 namespace WeatherApp.Controllers
 {
@@ -31,11 +33,33 @@ namespace WeatherApp.Controllers
             else
             {
                 // If there are multiple IP addresses, take the first one
-                ipAddress = ipAddress.Split(',').First();
+                ipAddress = ipAddress.Split(',', StringSplitOptions.RemoveEmptyEntries).FirstOrDefault()?.Trim();
+            }
+
+            // Check if the IP is a loopback address
+            if (string.IsNullOrEmpty(ipAddress) || 
+                IPAddress.IsLoopback(IPAddress.Parse(ipAddress)) ||
+                ipAddress == "::1")
+            {
+                // In development environment, try to get the local IP
+                ipAddress = GetLocalIpAddress();
             }
 
             return ipAddress ?? "IP Address not found";
         }
+
+private string GetLocalIpAddress()
+{
+    var host = Dns.GetHostEntry(Dns.GetHostName());
+    foreach (var ip in host.AddressList)
+    {
+        if (ip.AddressFamily == AddressFamily.InterNetwork)
+        {
+            return ip.ToString();
+        }
+    }
+    return "127.0.0.1";
+}
 
 
 
@@ -63,11 +87,14 @@ namespace WeatherApp.Controllers
                 {
                     new Claim(ClaimTypes.Name, model.Username),
                     new Claim(ClaimTypes.Role, user.UserType) // Add role claim
+
                 };
 
                 var claimsIdentity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
 
                 await HttpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, new ClaimsPrincipal(claimsIdentity));
+                var ipAddress = GetUserIpAddress();
+                Console.WriteLine($"IP Address before saving: {ipAddress}");
 
                     // Save login information
                     var userLogin = new UserLogin
@@ -75,7 +102,7 @@ namespace WeatherApp.Controllers
                         Username = model.Username,
                         LogId = Guid.NewGuid().ToString(), // Generate a new log ID
                         LogTime = DateTime.UtcNow, // Set the current time
-                        IpAdress = HttpContext.Connection.RemoteIpAddress?.ToString() ?? "Unknown" // Get IP address, fallback to "Unknown" if null
+                        IpAdress = ipAddress
                     };
                     await _mongoDbRepository.SaveUserLogin(userLogin);
 
