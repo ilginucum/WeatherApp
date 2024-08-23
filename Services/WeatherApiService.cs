@@ -74,5 +74,6 @@ namespace Weather_App.Services
                 MainStatus = item.Weather[0].Main
             };
         }
+        
     }
 }

@@ -8,6 +8,7 @@
     <title>Weather Forecast</title>
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/weather-icons/2.0.10/css/weather-icons.min.css">
 </head>
 <body>
     <div class="container my-5">
@@ -22,6 +23,8 @@
                         <p class="card-text">@Model.CurrentWeather.Date.ToString("MMMM d, yyyy")</p>
                         <p class="card-text">Temperature: @Model.CurrentWeather.Temperature°C</p>
                         <p class="card-text">Main Status: @Model.CurrentWeather.MainStatus</p>
+                        <i class="@GetWeatherIconClass(Model.CurrentWeather.MainStatus)" style="font-size: 48px;"></i>
+
                     </div>
                 </div>
             </div>
@@ -88,4 +91,27 @@
         });
     </script>
 </body>
+@functions {
+    string GetWeatherIconClass(string mainStatus)
+    {
+        return mainStatus?.ToLower() switch
+        {
+            "clear" => "wi wi-day-sunny",
+            "sunny" => "wi wi-day-sunny",
+            "warm" => "wi wi-day-sunny",
+            "cloudy" => "wi wi-cloudy",
+            "clouds" => "wi wi-cloudy",
+            "rain" => "wi wi-rain",
+            "rainy" => "wi wi-rain",
+            "snow" => "wi wi-snow",
+            "snowy" => "wi wi-snow",
+            "thunderstorm" => "wi wi-thunderstorm",
+            "drizzle" => "wi wi-sprinkle",
+            "mist" => "wi wi-fog",
+            "fog" => "wi wi-fog",
+            "foggy" => "wi wi-fog",
+            _ => "wi wi-na"
+        };
+    }
+}
 </html>

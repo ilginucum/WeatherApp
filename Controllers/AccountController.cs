@@ -102,7 +102,7 @@ private string GetLocalIpAddress()
                         Username = model.Username,
                         LogId = Guid.NewGuid().ToString(), // Generate a new log ID
                         LogTime = DateTime.UtcNow, // Set the current time
-                        IpAdress = ipAddress
+                        IpAdress = ipAddress,
                     };
                     await _mongoDbRepository.SaveUserLogin(userLogin);
 
