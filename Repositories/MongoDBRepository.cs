@@ -47,27 +47,28 @@ namespace Weather_App.Repositories
             return await collection.Find(u => u.Username == username).ToListAsync();
         }
 
-        public async Task UpdateUser(UserRegistration updatedUser)
-    {
-        var collection = _database.GetCollection<UserRegistration>("UserRegistrations");
-        var filter = Builders<UserRegistration>.Filter.Eq(u => u.Username, updatedUser.Username);
-        var updateDefinition = Builders<UserRegistration>.Update
-            .Set(u => u.Username, updatedUser.Username);
-
-        if (!string.IsNullOrEmpty(updatedUser.DefaultCity))
+       public async Task UpdateUser(string originalUsername, UserRegistration updatedUser)
         {
-            updateDefinition = updateDefinition.Set(u => u.DefaultCity, updatedUser.DefaultCity);
-        }
+            var collection = _database.GetCollection<UserRegistration>("UserRegistrations");
+            var filter = Builders<UserRegistration>.Filter.Eq(u => u.Username, originalUsername);
+            var update = Builders<UserRegistration>.Update;
 
-        if (!string.IsNullOrEmpty(updatedUser.Password))
-        {
-            updateDefinition = updateDefinition
-                .Set(u => u.Password, updatedUser.Password)
-                .Set(u => u.Salt, updatedUser.Salt);  // Add this line to update the salt
-        }
+            var updateDefinition = new List<UpdateDefinition<UserRegistration>>();
 
-        await collection.UpdateOneAsync(filter, updateDefinition);
-    }
+            // Always update these fields
+            updateDefinition.Add(update.Set(u => u.DefaultCity, updatedUser.DefaultCity));
+            updateDefinition.Add(update.Set(u => u.Username, updatedUser.Username));
+
+            if (!string.IsNullOrEmpty(updatedUser.Password))
+            {
+                updateDefinition.Add(update.Set(u => u.Password, updatedUser.Password));
+                updateDefinition.Add(update.Set(u => u.Salt, updatedUser.Salt));
+            }
+
+            var combinedUpdate = update.Combine(updateDefinition);
+
+            await collection.UpdateOneAsync(filter, combinedUpdate);
+        }
 
 
         public async Task InitializeUserTypeIfNeeded(string username)

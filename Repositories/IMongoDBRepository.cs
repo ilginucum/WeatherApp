@@ -18,7 +18,7 @@ namespace Weather_App.Repositories
         Task<UserRegistration> GetUserByUsername(string username);
         Task LogUserLogin(UserLogin userLogin);
         Task<IEnumerable<UserLogin>> GetUserLogins(string username);
-        Task UpdateUser(UserRegistration updatedUser);
+        Task UpdateUser(string originalUsername, UserRegistration updatedUser);
         Task InitializeUserTypeIfNeeded(string username);
         Task<WeatherForecast> GetTodayWeatherDataByCity(string cityName);
         Task<List<WeatherForecast>> GetWeeklyWeatherForecastByCity(string city);
