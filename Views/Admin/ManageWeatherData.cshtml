@@ -1,12 +1,44 @@
-@model IEnumerable<Weather_App.Models.WeatherForecast>
+@model Weather_App.Models.ManageWeatherDataViewModel
 
 <h2>Manage Weather Data</h2>
+
+@if (TempData["SuccessMessage"] != null)
+{
+    <div class="alert alert-success">
+        @TempData["SuccessMessage"]
+    </div>
+}
+
+<form asp-action="ManageWeatherData" method="get" class="mb-3">
+    <div class="form-row align-items-center">
+        <div class="col-auto">
+            <select asp-for="SelectedCity" class="form-control">
+                <option value="All">All Cities</option>
+                @foreach (var city in Model.Cities)
+                {
+                    <option value="@city.Text" selected="@(city.Text.Equals(Model.SelectedCity, StringComparison.OrdinalIgnoreCase))">@city.Text</option>
+                }
+            </select>
+        </div>
+        <div class="col-auto">
+            <label for="StartDate">Start Date:</label>
+            <input type="date" id="StartDate" name="StartDate" class="form-control" value="@(Model.StartDate?.ToString("yyyy-MM-dd"))" />
+        </div>
+        <div class="col-auto">
+            <label for="EndDate">End Date:</label>
+            <input type="date" id="EndDate" name="EndDate" class="form-control" value="@(Model.EndDate?.ToString("yyyy-MM-dd"))" />
+        </div>
+        <div class="col-auto">
+            <button type="submit" class="btn btn-primary">Filter</button>
+        </div>
+    </div>
+</form>
 
 <p>
     <a asp-action="AddWeatherData" class="btn btn-primary">Add New Weather Data</a>
 </p>
 
-@if (Model.Any())
+@if (Model.WeatherForecasts.Any())
 {
     <table class="table">
         <thead>
@@ -19,7 +51,7 @@
             </tr>
         </thead>
         <tbody>
-            @foreach (var item in Model)
+            @foreach (var item in Model.WeatherForecasts)
             {
                 <tr>
                     <td>@item.Date.ToShortDateString()</td>
@@ -39,7 +71,7 @@
 }
 else
 {
-    <p>No weather data available.</p>
+    <p>No weather data available for the selected filters.</p>
 }
 
 @section Scripts {

@@ -16,7 +16,9 @@ namespace Weather_App.Models
         public string CityName { get; set; }
         public string MainStatus { get; set; }
         //public string IconCode { get; set; }
-        public string ImageUrl { get; set; }
+        public string IconUrl { get; set; }
+        public string ImageUrl{get; set; }
+        
 
 
 

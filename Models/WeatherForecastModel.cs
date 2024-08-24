@@ -29,5 +29,6 @@ namespace Weather_App.Models
         [StringLength(50, ErrorMessage = "Main status cannot be longer than 50 characters")]
         [Display(Name = "Main Status")]
         public string MainStatus { get; set; }
+        
     }
 }

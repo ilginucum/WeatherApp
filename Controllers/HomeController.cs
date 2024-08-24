@@ -3,7 +3,6 @@ using Microsoft.AspNetCore.Mvc;
 using Weather_App.Models;
 using Weather_App.Repositories;
 using Weather_App.Services;
-using Weather_App.Options;
 using System.Threading.Tasks;
 
 namespace WeatherApp.Controllers
@@ -21,12 +20,14 @@ namespace WeatherApp.Controllers
         }
 
         [Authorize]
-        public async Task<IActionResult> Index()
+        public async Task<IActionResult> Index(string searchCity = null)
         {
             var username = User.Identity.Name;
             var user = await _repository.GetUserByUsername(username);
 
-            if (user == null || string.IsNullOrEmpty(user.DefaultCity))
+            string cityToUse = searchCity ?? user?.DefaultCity;
+
+            if (string.IsNullOrEmpty(cityToUse))
             {
                 return View(new WeatherViewModel
                 {
@@ -41,14 +42,12 @@ namespace WeatherApp.Controllers
                 });
             }
 
-            var currentWeather = await _repository.GetTodayWeatherDataByCity(user.DefaultCity);
+            var currentWeather = await _repository.GetTodayWeatherDataByCity(cityToUse);
             if (currentWeather == null)
             {
-                // Fetch the current weather data from the Weather API
-                currentWeather = await _weatherApiService.GetCurrentWeatherByCity(user.DefaultCity);
+                currentWeather = await _weatherApiService.GetCurrentWeatherByCity(cityToUse);
                 if (currentWeather != null)
                 {
-                    // Save the fetched weather data to the database
                     await _repository.AddWeatherData(currentWeather);
                 }
             }
@@ -57,20 +56,20 @@ namespace WeatherApp.Controllers
             {
                 currentWeather = new WeatherForecast
                 {
-                    CityName = user.DefaultCity,
+                    CityName = cityToUse,
                     Date = DateTime.Now,
                     Temperature = 0,
                     MainStatus = "No data available"
                 };
             }
 
-            // Fetch the weekly weather forecast from the Weather API
-            var weeklyForecast = await _weatherApiService.GetWeeklyWeatherForecastByCity(user.DefaultCity);
+            var weeklyForecast = await _weatherApiService.GetWeeklyWeatherForecastByCity(cityToUse);
 
             var viewModel = new WeatherViewModel
             {
                 CurrentWeather = currentWeather,
-                WeeklyForecast = weeklyForecast
+                WeeklyForecast = weeklyForecast,
+                SearchCity = searchCity
             };
 
             return View(viewModel);
