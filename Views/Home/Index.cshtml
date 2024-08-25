@@ -8,7 +8,8 @@
     <title>Weather Forecast</title>
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/weather-icons/2.0.10/css/weather-icons.min.css">
+    <!-- Add Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
@@ -30,10 +31,6 @@
         }
         .weather-card:hover {
             transform: translateY(-5px);
-        }
-        .weather-icon {
-            font-size: 48px;
-            color: #F5A623;
         }
         .btn-search {
             background-color: #F5A623;
@@ -61,16 +58,39 @@
             box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
         }
         .navbar {
-            background: rgba(74, 144, 226, 0.3); /* Semi-transparent blue */
-            backdrop-filter: blur(10px); /* Adds a blur effect */
+            background: rgba(74, 144, 226, 0.3);
+            backdrop-filter: blur(10px);
             border: none;
             box-shadow: 0 2px 4px rgba(0,0,0,0.1);
         }
-
         .navbar-brand, .navbar-nav .nav-link {
-            color: #4A90E2 !important; /* White text */
+            color: #4A90E2 !important;
             font-weight: bold;
         }
+        .weather-icon {
+            display: inline-block;
+            font-size: 2rem;
+            color: #4A90E2;
+        }
+        .weather-icon-large {
+            font-size: 4rem;
+        }
+        .weather-icon-small {
+            font-size: 1.5rem;
+        }
+        .fa-sun { color: #FFD700; }
+        .fa-cloud-sun { color: #FFA500; }
+        .fa-cloud { color: #A9A9A9; }
+        .fa-cloud-rain, .fa-cloud-showers-heavy { color: #4682B4; }
+        .fa-snowflake { color: #ADD8E6; }
+        .fa-bolt { color: #FFD700; }
+        .fa-smog { color: #778899; }
+        .fa-wind { color: #87CEEB; }
+        .chart-container {
+            height: 200px; /* Adjust this value to make the chart smaller or larger */
+            width: 100%;
+        }
+        
     </style>
 </head>
 <body>
@@ -98,7 +118,13 @@
                     <p class="card-text">@Model.CurrentWeather.Date.ToString("MMMM d, yyyy")</p>
                     <p class="card-text">Temperature: @Model.CurrentWeather.Temperature°C</p>
                     <p class="card-text">Main Status: @Model.CurrentWeather.MainStatus</p>
-                    <i class="@GetWeatherIconClass(Model.CurrentWeather.MainStatus) weather-icon"></i>
+                    <i class="weather-icon weather-icon-large @GetWeatherIconClass(Model.CurrentWeather.MainStatus)"></i>
+                </div>
+                <div class="weather-card p-4 mt-4">
+                    <h2 class="text-center mb-3">Weekly Temperature Chart</h2>
+                    <div class="chart-container">
+                        <canvas id="weatherChart"></canvas>
+                    </div>
                 </div>
             </div>
             <div class="col-md-6 mb-4">
@@ -108,29 +134,30 @@
                         <table class="table table-hover table-forecast">
                             <thead>
                                 <tr>
-                                    <th>Date</th>
+                                    <th>Day</th>
                                     <th>Temperature</th>
                                     <th>Main Status</th>
+                                    <th>Icon</th>
                                 </tr>
                             </thead>
                             <tbody>
-                        @foreach (var forecast in Model.WeeklyForecast)
-                        {
-                            <tr>
-                                <td>@forecast.Date.ToString("MMM dd")</td>
-                                <td>@forecast.Temperature°C</td>
-                                <td>@forecast.MainStatus</td>
-                            </tr>
-                        }
-                    </tbody>
-                </table>
-            </div>
-        </div>
-
-        <div class="row mt-5">
-            <div class="col-12">
-                <h2 class="text-center">Weekly Temperature Chart</h2>
-                <canvas id="weatherChart"></canvas>
+                            @foreach (var forecast in Model.WeeklyForecast)
+                            {
+                                <tr>
+                                    <td>
+                                        @forecast.Date.ToString("ddd, MMM dd")
+                                    </td>
+                                    <td>@forecast.Temperature°C</td>
+                                    <td>@forecast.MainStatus</td>
+                                    <td>
+                                        <i class="weather-icon weather-icon-small @GetWeatherIconClass(forecast.MainStatus)"></i>
+                                    </td>
+                                </tr>
+                            }
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
@@ -151,41 +178,63 @@
                     data: data,
                     backgroundColor: 'rgba(75, 192, 192, 0.2)',
                     borderColor: 'rgba(75, 192, 192, 1)',
-                    borderWidth: 1,
-                    fill: false
+                    borderWidth: 2,
+                    fill: true,
+                    tension: 0.1
                 }]
             },
             options: {
                 responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        display: false
+                    }
+                },
                 scales: {
                     y: {
-                        beginAtZero: true
+                        beginAtZero: false,
+                        ticks: {
+                            font: {
+                                size: 10
+                            }
+                        }
+                    },
+                    x: {
+                        ticks: {
+                            font: {
+                                size: 10
+                            }
+                        }
                     }
                 }
             }
         });
     </script>
 </body>
+</html>
+
 @functions {
     string GetWeatherIconClass(string mainStatus)
     {
-        return mainStatus?.ToLower() switch
+        if (string.IsNullOrWhiteSpace(mainStatus))
+            return "fas fa-question";
+
+        mainStatus = mainStatus.ToLower();
+
+        return mainStatus switch
         {
-            "clear" => "wi wi-day-sunny",
-            "sunny" => "wi wi-day-sunny",
-            "warm" => "wi wi-day-sunny",
-            "cloudy" => "wi wi-cloudy",
-            "clouds" => "wi wi-cloudy",
-            "rain" => "wi wi-rain",
-            "rainy" => "wi wi-rain",
-            "snow" => "wi wi-snow",
-            "snowy" => "wi wi-snow",
-            "thunderstorm" => "wi wi-thunderstorm",
-            "drizzle" => "wi wi-sprinkle",
-            "mist" => "wi wi-fog",
-            "fog" => "wi wi-fog",
-            "foggy" => "wi wi-fog",
-            _ => "wi wi-na"
+            var s when s.Contains("sunny") && s.Contains("cloud") => "fas fa-cloud-sun",
+            var s when s.Contains("sunny") || s.Contains("clear") => "fas fa-sun",
+            var s when s.Contains("partly cloudy") => "fas fa-cloud-sun",
+            var s when s.Contains("cloud") || s.Contains("overcast") => "fas fa-cloud",
+            var s when s.Contains("patchy rain") || s.Contains("light rain") => "fas fa-cloud-rain",
+            var s when s.Contains("rain") || s.Contains("drizzle") => "fas fa-cloud-showers-heavy",
+            var s when s.Contains("snow") || s.Contains("sleet") => "fas fa-snowflake",
+            var s when s.Contains("thunder") || s.Contains("storm") => "fas fa-bolt",
+            var s when s.Contains("fog") || s.Contains("mist") || s.Contains("haze") => "fas fa-smog",
+            var s when s.Contains("wind") => "fas fa-wind",
+            _ => "fas fa-cloud" // Default to cloud if unknown
         };
     }
 }

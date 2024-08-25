@@ -3,10 +3,8 @@ using MongoDB.Driver;
 using Weather_App.Models;
 using Weather_App.Options;
 using Weather_App.Repositories;
-using Microsoft.AspNetCore.Authentication.Cookies;
-using System.Net.Http;
-using Newtonsoft.Json;
 using Weather_App.Services;
+using Microsoft.AspNetCore.Authentication.Cookies;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -20,12 +18,12 @@ builder.Services.AddScoped<IMongoDBRepository, MongoDbRepository>();
 
 // Add authentication services with cookie authentication
 builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
-.AddCookie(options =>
-{
-    options.LoginPath = "/Account/Login"; // Redirect to login page
-    options.LogoutPath = "/Account/Logout"; // Add logout path
-    options.AccessDeniedPath = "/Account/AccessDenied"; // Add access denied path
-});
+    .AddCookie(options =>
+    {
+        options.LoginPath = "/Account/Login";
+        options.LogoutPath = "/Account/Logout";
+        options.AccessDeniedPath = "/Account/AccessDenied";
+    });
 
 // Add session services
 builder.Services.AddSession(options =>
@@ -35,12 +33,18 @@ builder.Services.AddSession(options =>
     options.Cookie.IsEssential = true;
 });
 
-// Add HttpClient service for making API requests
-builder.Services.AddHttpClient();
-
-// Add WeatherApiService
+// Configure WeatherAPI options
 builder.Services.Configure<WeatherApiOptions>(builder.Configuration.GetSection("WeatherApiOptions"));
-builder.Services.AddHttpClient<IWeatherApiService, WeatherApiService>();
+// Add HttpClient and WeatherApiService
+builder.Services.AddHttpClient<IWeatherApiService, WeatherApiService>((serviceProvider, client) =>
+{
+    var weatherApiOptions = serviceProvider.GetRequiredService<IOptions<WeatherApiOptions>>().Value;
+    if (string.IsNullOrEmpty(weatherApiOptions.BaseUrl))
+    {
+        throw new InvalidOperationException("WeatherApiOptions.BaseUrl is null or empty. Check your configuration.");
+    }
+    client.BaseAddress = new Uri(weatherApiOptions.BaseUrl);
+});
 
 IMongoClient CreateMongoClient(IServiceProvider sp)
 {
@@ -60,9 +64,9 @@ if (!app.Environment.IsDevelopment())
 app.UseHttpsRedirection();
 app.UseStaticFiles();
 app.UseRouting();
-app.UseAuthentication(); // Enable authentication
+app.UseAuthentication();
 app.UseAuthorization();
-app.UseSession(); // Enable session
+app.UseSession();
 
 app.MapControllerRoute(
     name: "default",
