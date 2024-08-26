@@ -12,9 +12,9 @@ public class UserLogin
     public string Username { get; set; }
     public string Password { get; set; }
     public string LogId { get; set; }
-    public DateTime LogTime { get; set; }
+    public DateTime? LogTime { get; set; }
     public string IpAdress { get; set; }
-    public string Log {get; set; }
+    public DateTime? LogOutTime {get; set; }
     public bool IsSuccessful { get; set; }
     
     

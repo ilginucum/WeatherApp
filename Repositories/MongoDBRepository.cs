@@ -189,7 +189,21 @@ namespace Weather_App.Repositories
         var filter = Builders<UserRegistration>.Filter.Eq(u => u.Username, user.Username);
         await collection.ReplaceOneAsync(filter, user);
     }
+    //logout time
     
+     public async Task UpdateLogoutTime(string username, DateTime logoutTime)
+    {
+        var collection = _database.GetCollection<UserLogin>("UserLogins");
+        var filter = Builders<UserLogin>.Filter
+            .And(
+                Builders<UserLogin>.Filter.Eq(u => u.Username, username),
+                Builders<UserLogin>.Filter.Eq(u => u.LogOutTime, null)
+            );
+        var update = Builders<UserLogin>.Update
+            .Set(u => u.LogOutTime, logoutTime);
+
+        await collection.UpdateOneAsync(filter, update);
+    }
 
     }
 }

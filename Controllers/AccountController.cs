@@ -134,6 +134,7 @@ public async Task<IActionResult> Login(LoginModel model)
                 LogTime = DateTime.UtcNow,
                 IpAdress = ipAddress,
                 IsSuccessful = false
+                //LogOutTime = null
             };
             await _mongoDbRepository.SaveUserLogin(userLogin);
 
@@ -218,9 +219,15 @@ public async Task<IActionResult> Login(LoginModel model)
             return View(model);
         }
 
-        // GET: /Account/Logout
-        public async Task<IActionResult> Logout()
+       // GET: /Account/Logout
+         public async Task<IActionResult> Logout()
         {
+            var username = User.Identity.Name;
+            if (!string.IsNullOrEmpty(username))
+            {
+                await _mongoDbRepository.UpdateLogoutTime(username, DateTime.UtcNow);
+            }
+
             await HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
             return RedirectToAction("Login", "Account");
         }

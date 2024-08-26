@@ -26,6 +26,7 @@ namespace Weather_App.Repositories
         Task IncrementFailedLoginAttempts(string username);
         Task ResetFailedLoginAttempts(string username);
         Task<bool> IsUserLockedOut(string username);
+        Task UpdateLogoutTime(string username, DateTime logoutTime);
 
 
        
