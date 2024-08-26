@@ -1,0 +1,241 @@
+﻿@model Weather_App.Models.WeatherViewModel
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Weather Forecast</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- Add Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #F5F5F5;
+            color: #333333;
+        }
+        .weather-header {
+            background-color: #4A90E2;
+            color: #FFFFFF;
+            padding: 20px 0;
+            margin-bottom: 30px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        .weather-card {
+            background-color: #FFFFFF;
+            border-radius: 15px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            transition: transform 0.3s ease;
+        }
+        .weather-card:hover {
+            transform: translateY(-5px);
+        }
+        .btn-search {
+            background-color: #F5A623;
+            border-color: #F5A623;
+            color: #FFFFFF;
+        }
+        .btn-search:hover {
+            background-color: #E09600;
+            border-color: #E09600;
+            color: #FFFFFF;
+        }
+        .table-forecast {
+            background-color: #FFFFFF;
+            border-radius: 15px;
+            overflow: hidden;
+        }
+        .table-forecast th {
+            background-color: #4A90E2;
+            color: #FFFFFF;
+        }
+        .chart-container {
+            background-color: #FFFFFF;
+            border-radius: 15px;
+            padding: 20px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        .navbar {
+            background: rgba(74, 144, 226, 0.3);
+            backdrop-filter: blur(10px);
+            border: none;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .navbar-brand, .navbar-nav .nav-link {
+            color: #4A90E2 !important;
+            font-weight: bold;
+        }
+        .weather-icon {
+            display: inline-block;
+            font-size: 2rem;
+            color: #4A90E2;
+        }
+        .weather-icon-large {
+            font-size: 4rem;
+        }
+        .weather-icon-small {
+            font-size: 1.5rem;
+        }
+        .fa-sun { color: #FFD700; }
+        .fa-cloud-sun { color: #FFA500; }
+        .fa-cloud { color: #A9A9A9; }
+        .fa-cloud-rain, .fa-cloud-showers-heavy { color: #4682B4; }
+        .fa-snowflake { color: #ADD8E6; }
+        .fa-bolt { color: #FFD700; }
+        .fa-smog { color: #778899; }
+        .fa-wind { color: #87CEEB; }
+        .chart-container {
+            height: 200px; /* Adjust this value to make the chart smaller or larger */
+            width: 100%;
+        }
+        
+    </style>
+</head>
+<body>
+    <div class="weather-header">
+        <div class="container">
+            <h1 class="text-center">Weather Forecast</h1>
+        </div>
+    </div>
+
+    <div class="container">
+        <div class="row mb-4">
+            <div class="col-md-6 offset-md-3">
+                <form method="get" action="@Url.Action("Index", "Home")" class="form-inline justify-content-center">
+                    <input type="text" name="searchCity" class="form-control mr-2" placeholder="Enter city name" value="@Model.SearchCity">
+                    <button type="submit" class="btn btn-search">Search</button>
+                </form>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-md-6 mb-4">
+                <div class="weather-card p-4">
+                    <h2>Current Weather</h2>
+                    <h5 class="card-title">@Model.CurrentWeather.CityName</h5>
+                    <p class="card-text">@Model.CurrentWeather.Date.ToString("MMMM d, yyyy")</p>
+                    <p class="card-text">Temperature: @Model.CurrentWeather.Temperature°C</p>
+                    <p class="card-text">Main Status: @Model.CurrentWeather.MainStatus</p>
+                    <i class="weather-icon weather-icon-large @GetWeatherIconClass(Model.CurrentWeather.MainStatus)"></i>
+                </div>
+                <div class="weather-card p-4 mt-4">
+                    <h2 class="text-center mb-3">Weekly Temperature Chart</h2>
+                    <div class="chart-container">
+                        <canvas id="weatherChart"></canvas>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6 mb-4">
+                <div class="weather-card p-4">
+                    <h2>Weekly Forecast</h2>
+                    <div class="table-responsive">
+                        <table class="table table-hover table-forecast">
+                            <thead>
+                                <tr>
+                                    <th>Day</th>
+                                    <th>Temperature</th>
+                                    <th>Main Status</th>
+                                    <th>Icon</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                            @foreach (var forecast in Model.WeeklyForecast)
+                            {
+                                <tr>
+                                    <td>
+                                        @forecast.Date.ToString("ddd, MMM dd")
+                                    </td>
+                                    <td>@forecast.Temperature°C</td>
+                                    <td>@forecast.MainStatus</td>
+                                    <td>
+                                        <i class="weather-icon weather-icon-small @GetWeatherIconClass(forecast.MainStatus)"></i>
+                                    </td>
+                                </tr>
+                            }
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Prepare data for the chart
+        const labels = @Html.Raw(Json.Serialize(Model.WeeklyForecast.Select(f => f.Date.ToString("MMM dd")).ToList()));
+        const data = @Html.Raw(Json.Serialize(Model.WeeklyForecast.Select(f => f.Temperature).ToList()));
+
+        // Configuring the Chart
+        const ctx = document.getElementById('weatherChart').getContext('2d');
+        const weatherChart = new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: labels,
+                datasets: [{
+                    label: 'Temperature (°C)',
+                    data: data,
+                    backgroundColor: 'rgba(75, 192, 192, 0.2)',
+                    borderColor: 'rgba(75, 192, 192, 1)',
+                    borderWidth: 2,
+                    fill: true,
+                    tension: 0.1
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        display: false
+                    }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: false,
+                        ticks: {
+                            font: {
+                                size: 10
+                            }
+                        }
+                    },
+                    x: {
+                        ticks: {
+                            font: {
+                                size: 10
+                            }
+                        }
+                    }
+                }
+            }
+        });
+    </script>
+</body>
+</html>
+
+@functions {
+    string GetWeatherIconClass(string mainStatus)
+    {
+        if (string.IsNullOrWhiteSpace(mainStatus))
+            return "fas fa-question";
+
+        mainStatus = mainStatus.ToLower();
+
+        return mainStatus switch
+        {
+            var s when s.Contains("sunny") && s.Contains("cloud") => "fas fa-cloud-sun",
+            var s when s.Contains("sunny") || s.Contains("clear") => "fas fa-sun",
+            var s when s.Contains("partly cloudy") => "fas fa-cloud-sun",
+            var s when s.Contains("cloud") || s.Contains("overcast") => "fas fa-cloud",
+            var s when s.Contains("patchy rain") || s.Contains("light rain") => "fas fa-cloud-rain",
+            var s when s.Contains("rain") || s.Contains("drizzle") => "fas fa-cloud-showers-heavy",
+            var s when s.Contains("snow") || s.Contains("sleet") => "fas fa-snowflake",
+            var s when s.Contains("thunder") || s.Contains("storm") => "fas fa-bolt",
+            var s when s.Contains("fog") || s.Contains("mist") || s.Contains("haze") => "fas fa-smog",
+            var s when s.Contains("wind") => "fas fa-wind",
+            _ => "fas fa-cloud" // Default to cloud if unknown
+        };
+    }
+}
+</html>
