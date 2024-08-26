@@ -15,5 +15,7 @@ public class UserLogin
     public DateTime LogTime { get; set; }
     public string IpAdress { get; set; }
     public string Log {get; set; }
+    public bool IsSuccessful { get; set; }
+    
     
 }

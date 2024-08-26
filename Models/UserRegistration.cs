@@ -17,10 +17,12 @@ public class UserRegistration
     public string DefaultCity { get; set; }
     public string Status { get; set; }
 
-    
-        // New properties for login attempts
+    // New properties for login attempts
     public int FailedLoginAttempts { get; set; }
     public DateTime? LockoutEnd { get; set; }
+    public DateTime? LastFailedLoginAttempt { get; set; }
+
+
     
    
     

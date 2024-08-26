@@ -8,6 +8,7 @@ using System.Threading.Tasks;
 using Weather_App.Helpers;
 using System.Net;
 using System.Net.Sockets;
+using Weather_App.Extensions;
 
 namespace WeatherApp.Controllers
 {
@@ -71,52 +72,107 @@ namespace WeatherApp.Controllers
 
         // POST: /Account/Login
         [HttpPost]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Login(LoginModel model)
+[ValidateAntiForgeryToken]
+public async Task<IActionResult> Login(LoginModel model)
+{
+    var user = await _mongoDbRepository.GetUserByUsername(model.Username);
+    if (user != null)
+    {
+        // Check if the account is currently locked out
+        if (user.FailedLoginAttempts >= 3 && user.LastFailedLoginAttempt.HasValue)
         {
-            // Retrieve user from the repository
-        var user = await _mongoDbRepository.GetUserByUsername(model.Username);
-
-        if (user != null)
-        {
-            // Verify the entered password
-            if (PasswordHelper.VerifyPassword(model.Password, user.Salt, user.Password))
+            var lockoutEndTime = user.LastFailedLoginAttempt.Value.AddMinutes(1);
+            if (DateTime.UtcNow < lockoutEndTime)
             {
-                // Create claims for authentication
-                var claims = new List<Claim>
-                {
-                    new Claim(ClaimTypes.Name, model.Username),
-                    new Claim(ClaimTypes.Role, user.UserType) // Add role claim
-
-                };
-
-                var claimsIdentity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
-
-                await HttpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, new ClaimsPrincipal(claimsIdentity));
-                var ipAddress = GetUserIpAddress();
-                Console.WriteLine($"IP Address before saving: {ipAddress}");
-
-                    // Save login information
-                    var userLogin = new UserLogin
-                    {
-                        Username = model.Username,
-                        LogId = Guid.NewGuid().ToString(), // Generate a new log ID
-                        LogTime = DateTime.UtcNow, // Set the current time
-                        IpAdress = ipAddress,
-                    };
-                    await _mongoDbRepository.SaveUserLogin(userLogin);
-
-                    return RedirectToAction("Index", "Home");
-
-                    
-                }
-                else
-                {
-                    ModelState.AddModelError("", "Invalid login attempt.");
-                }
+                var remainingLockoutTime = (int)(lockoutEndTime - DateTime.UtcNow).TotalSeconds;
+                return Request.IsAjaxRequest() 
+                    ? Json(new { locked = true, remainingTime = remainingLockoutTime }) 
+                    : View(model);
             }
-            return View(model);
         }
+
+        // Verify the password
+        if (PasswordHelper.VerifyPassword(model.Password, user.Salt, user.Password))
+        {
+            // Correct password, reset failed attempts and log in
+            await _mongoDbRepository.ResetFailedLoginAttempts(model.Username);
+
+            var claims = new List<Claim>
+            {
+                new Claim(ClaimTypes.Name, model.Username),
+                new Claim(ClaimTypes.Role, user.UserType)
+            };
+            var claimsIdentity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
+            await HttpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, new ClaimsPrincipal(claimsIdentity));
+
+            var ipAddress = GetUserIpAddress();
+            var userLogin = new UserLogin
+            {
+                Username = model.Username,
+                LogId = Guid.NewGuid().ToString(),
+                LogTime = DateTime.UtcNow,
+                IpAdress = ipAddress,
+                IsSuccessful = true
+            };
+            await _mongoDbRepository.SaveUserLogin(userLogin);
+
+            return Request.IsAjaxRequest() 
+                ? Json(new { success = true, redirectUrl = Url.Action("Index", "Home") }) 
+                : RedirectToAction("Index", "Home");
+        }
+        else
+        {
+            // Incorrect password, increment failed attempts
+            await _mongoDbRepository.IncrementFailedLoginAttempts(model.Username);
+            user = await _mongoDbRepository.GetUserByUsername(model.Username); // Refresh user data
+
+            var ipAddress = GetUserIpAddress();
+            var userLogin = new UserLogin
+            {
+                Username = model.Username,
+                LogId = Guid.NewGuid().ToString(),
+                LogTime = DateTime.UtcNow,
+                IpAdress = ipAddress,
+                IsSuccessful = false
+            };
+            await _mongoDbRepository.SaveUserLogin(userLogin);
+
+            string errorMessage;
+            if (user.FailedLoginAttempts == 1)
+            {
+                errorMessage = "Invalid login attempt. 2 more tries left.";
+            }
+            else if (user.FailedLoginAttempts == 2)
+            {
+                errorMessage = "Invalid login attempt. 1 more try left.";
+            }
+            else if (user.FailedLoginAttempts >= 3)
+            {
+                // Account is now locked
+                return Request.IsAjaxRequest() 
+                    ? Json(new { locked = true, remainingTime = 60 }) 
+                    : View(model);
+            }
+            else
+            {
+                errorMessage = "Invalid login attempt.";
+            }
+
+            ModelState.AddModelError("", errorMessage);
+            return Request.IsAjaxRequest() 
+                ? Json(new { success = false, errorMessage = errorMessage }) 
+                : View(model);
+        }
+    }
+    else
+    {
+        ModelState.AddModelError("", "Invalid login attempt.");
+    }
+
+    return Request.IsAjaxRequest() 
+        ? Json(new { success = false, errorMessage = "Invalid login attempt." }) 
+        : View(model);
+}
 
         // GET: /Account/Register
         public IActionResult Register()
@@ -172,4 +228,6 @@ namespace WeatherApp.Controllers
         
     }
 }
+
+
 

@@ -10,6 +10,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>@ViewData["Title"] - Weather App</title>
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <style>
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
@@ -214,6 +215,15 @@
             border-radius: 5px;
             color: #721c24;
         }
+        #errorMessage, #successMessage {
+            margin-top: 10px;
+        }
+        #errorMessage {
+            color: red;
+        }
+        #successMessage {
+            color: green;
+        }
     </style>
 </head>
 <body>
@@ -228,7 +238,7 @@
         <div class="login-header">
             <h2>@ViewData["Title"]</h2>
         </div>
-        <form asp-action="Login">
+        <form asp-action="Login" id="loginForm" method="post">
             <div asp-validation-summary="ModelOnly" class="text-danger"></div>
             <div class="form-group">
                 <label asp-for="Username" class="control-label">Username</label>
@@ -241,20 +251,71 @@
                 <span asp-validation-for="Password" class="text-danger"></span>
             </div>
             <div class="form-group">
-                <input type="submit" value="Login" class="btn btn-login btn-block" />
+                <input type="submit" value="Login" class="btn btn-login btn-block" id="loginButton" />
             </div>
         </form>
+        <div id="errorMessage"></div>
+        <div id="successMessage"></div>
         <div id="lockoutMessage" style="display: none;">
             Account is locked. Please try again in <span id="countdown"></span> seconds.
         </div>
-
         <div class="register-link">
             <a asp-action="Register">Register New User</a>
         </div>
     </div>
-@section Scripts {
-    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
-}
 
+    <script>
+        $(document).ready(function () {
+            var lockoutEndTime = 0;
+
+            $('#loginForm').submit(function (e) {
+                e.preventDefault();
+                $.ajax({
+                    url: $(this).attr('action'),
+                    type: 'POST',
+                    data: $(this).serialize(),
+                    success: function (response) {
+                        if (response.locked) {
+                            lockoutEndTime = new Date().getTime() + (response.remainingTime * 1000);
+                            startCountdown();
+                        } else if (response.success) {
+                            window.location.href = response.redirectUrl;
+                        } else {
+                            $('#errorMessage').text(response.errorMessage).show();
+                            $('#successMessage').hide();
+                        }
+                    },
+                    error: function () {
+                        // If AJAX fails, submit the form traditionally
+                        $('#loginForm').off('submit').submit();
+                    }
+                });
+            });
+
+            function startCountdown() {
+                $('#loginButton').prop('disabled', true);
+                $('#errorMessage').hide();
+                $('#successMessage').hide();
+                $('#lockoutMessage').show();
+                updateCountdown();
+
+                var countdownInterval = setInterval(function () {
+                    if (updateCountdown() <= 0) {
+                        clearInterval(countdownInterval);
+                        $('#loginButton').prop('disabled', false);
+                        $('#lockoutMessage').hide();
+                        $('#successMessage').text('Now you can try again.').show();
+                        $('#errorMessage').hide();
+                    }
+                }, 1000);
+            }
+
+            function updateCountdown() {
+                var remainingTime = Math.ceil((lockoutEndTime - new Date().getTime()) / 1000);
+                $('#countdown').text(remainingTime);
+                return remainingTime;
+            }
+        });
+    </script>
 </body>
 </html>

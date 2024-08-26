@@ -23,6 +23,10 @@ namespace Weather_App.Repositories
         Task<WeatherForecast> GetTodayWeatherDataByCity(string cityName);
         Task<List<WeatherForecast>> GetWeeklyWeatherForecastByCity(string city);
         Task EditUser(UserRegistration user);
+        Task IncrementFailedLoginAttempts(string username);
+        Task ResetFailedLoginAttempts(string username);
+        Task<bool> IsUserLockedOut(string username);
+
 
        
         

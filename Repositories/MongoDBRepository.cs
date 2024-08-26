@@ -36,6 +36,38 @@ namespace Weather_App.Repositories
             return user;
 
         }
+        //coundown methods 
+        public async Task IncrementFailedLoginAttempts(string username)
+    {
+        var collection = _database.GetCollection<UserRegistration>("UserRegistrations");
+        var filter = Builders<UserRegistration>.Filter.Eq(u => u.Username, username);
+        var update = Builders<UserRegistration>.Update
+            .Inc(u => u.FailedLoginAttempts, 1)
+            .Set(u => u.LastFailedLoginAttempt, DateTime.UtcNow);
+        await collection.UpdateOneAsync(filter, update);
+    }
+
+    public async Task ResetFailedLoginAttempts(string username)
+    {
+        var collection = _database.GetCollection<UserRegistration>("UserRegistrations");
+        var filter = Builders<UserRegistration>.Filter.Eq(u => u.Username, username);
+        var update = Builders<UserRegistration>.Update
+            .Set(u => u.FailedLoginAttempts, 0)
+            .Set(u => u.LastFailedLoginAttempt, null);
+        await collection.UpdateOneAsync(filter, update);
+    }
+
+        public async Task<bool> IsUserLockedOut(string username)
+    {
+        var user = await GetUserByUsername(username);
+        if (user == null || user.FailedLoginAttempts < 3 || user.LastFailedLoginAttempt == null)
+        {
+            return false;
+        }
+
+        var lockoutEndTime = user.LastFailedLoginAttempt.Value.AddMinutes(1);
+        return DateTime.UtcNow < lockoutEndTime;
+    }
         
 
 
@@ -157,5 +189,7 @@ namespace Weather_App.Repositories
         var filter = Builders<UserRegistration>.Filter.Eq(u => u.Username, user.Username);
         await collection.ReplaceOneAsync(filter, user);
     }
+    
+
     }
 }
